@@ -23,7 +23,47 @@ userRouter
 
 userRouter.route("/:id").get(getUserById);
 
-authRouter.route("/signup").post(signUpUser);
+authRouter.route("/signup").post(setCreatedAt, signUpUser);
+
+function setCreatedAt(req, res, next) {
+  //time at which user was created, it is a middleware thats why we use next also as one of its arguments
+  let obj = req.body;
+  //keys ka arr -> uska length
+  let length = Object.keys(obj).length;
+  if (length == 0) {
+    return res
+      .status(400)
+      .json({ message: "cannot create user if req.body is empty" });
+  }
+  req.body.createdAt = new Date().toISOString();
+  next();
+}
+
+const userModel = require("./models/userModel");
+
+async function signUpUser(req, res) {
+  // let userDetails = req.body;
+  // let name = userDetails.name;
+  // let email = userDetails.email;
+  // let password = userDetails.password;
+  try {
+    let userObj = req.body;
+    // user.push({ email, name, password });
+    // put all data in mongo db
+
+    //create doc in userModel
+    let user = await userModel.create(userObj);
+    // console.log("user", req.body);
+    res.json({
+      message: "user signed up",
+      user: userObj,
+    });
+  } 
+  catch (err) {
+    console.log(err);
+    res.json({ message: err.message });
+  }
+}
 
 authRouter
   .route("/forgetPassword")
@@ -55,12 +95,12 @@ function validateEmail(req, res) {
   //indexOf
   let email = req.body.email;
   let emailStr = JSON.stringify(email);
-  if(emailStr.indexOf('@') !== -1 && emailStr.indexOf('.') !== -1){
-    res.send('email is ok')
-  }else{
-    res.send('try again')
+  if (emailStr.indexOf("@") !== -1 && emailStr.indexOf(".") !== -1) {
+    res.send("email is ok");
+  } else {
+    res.send("try again");
   }
-   
+
   res.json({
     message: "data recieved",
     data: req.body,
@@ -107,22 +147,6 @@ function deleteUser(req, res) {
 function getUserById(req, res) {
   console.log(req.params);
   res.json(req.params.id);
-}
-
-function signUpUser(req, res) {
-  // let userDetails = req.body;
-  // let name = userDetails.name;
-  // let email = userDetails.email;
-  // let password = userDetails.password;
-
-  let { email, name, password } = req.body;
-  // user.push({ email, name, password });
-  // put all data in mongo db
-  console.log("user", req.body);
-  res.json({
-    message: "user signed up",
-    user: req.body,
-  });
 }
 
 //REDIRECTS
