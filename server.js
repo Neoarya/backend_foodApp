@@ -1,4 +1,5 @@
 const express = require("express");
+
 const app = express();
 // const router = express.Router();
 
@@ -9,153 +10,26 @@ app.listen("5000", function () {
 app.use(express.json());
 app.use(express.static("public"));
 
-const userRouter = express.Router();
-const authRouter = express.Router();
+const userRouter = require("./Routers/userRouter");
+const authRouter = require("./Routers/authRouter");
 app.use("/user", userRouter);
 app.use("/auth", authRouter);
-//mounting in express
-userRouter
-  .route("/")
-  .get(getUser)
-  .post(createUser)
-  .patch(updateUser)
-  .delete(deleteUser);
 
-userRouter.route("/:id").get(getUserById);
+// let user = [];
 
-authRouter.route("/signup").post(setCreatedAt, signUpUser);
+// //client <- server
+// app.get("/", (req, res) => {
+//   res.send("Home Page");
+// });
 
-function setCreatedAt(req, res, next) {
-  //time at which user was created, it is a middleware thats why we use next also as one of its arguments
-  let obj = req.body;
-  //keys ka arr -> uska length
-  let length = Object.keys(obj).length;
-  if (length == 0) {
-    return res
-      .status(400)
-      .json({ message: "cannot create user if req.body is empty" });
-  }
-  req.body.createdAt = new Date().toISOString();
-  next();
-}
 
-const userModel = require("./models/userModel");
+// //REDIRECTS
+// app.get("/user-all", (req, res) => {
+//   res.redirect("/user");
+// });
 
-async function signUpUser(req, res) {
-  // let userDetails = req.body;
-  // let name = userDetails.name;
-  // let email = userDetails.email;
-  // let password = userDetails.password;
-  try {
-    let userObj = req.body;
-    // user.push({ email, name, password });
-    // put all data in mongo db
-
-    //create doc in userModel
-    let user = await userModel.create(userObj);
-    // console.log("user", req.body);
-    res.json({
-      message: "user signed up",
-      user: userObj,
-    });
-  } 
-  catch (err) {
-    console.log(err);
-    res.json({ message: err.message });
-  }
-}
-
-authRouter
-  .route("/forgetPassword")
-  .get(getForgetPassword)
-  .post(postForgetPassword, validateEmail);
-
-function getForgetPassword(req, res) {
-  res.sendFile("./public/forgetPassword.html", { root: __dirname });
-}
-
-function postForgetPassword(req, res, next) {
-  let data = req.body;
-  console.log("data", data);
-  //check if email id is correct - validate (we will use a middleware for this purpose)
-  next();
-  //check if user exists in db
-
-  // res.json({
-  //   message: "data recieved",
-  //   data: data.email,
-  // });
-}
-
-function validateEmail(req, res) {
-  console.log("in validateEmail function");
-  console.log(req.body);
-
-  // to check if email is correct or not -> @ , .
-  //indexOf
-  let email = req.body.email;
-  let emailStr = JSON.stringify(email);
-  if (emailStr.indexOf("@") !== -1 && emailStr.indexOf(".") !== -1) {
-    res.send("email is ok");
-  } else {
-    res.send("try again");
-  }
-
-  res.json({
-    message: "data recieved",
-    data: req.body,
-  });
-}
-
-let user = [];
-
-//client <- server
-app.get("/", (req, res) => {
-  res.send("Home Page");
-});
-
-// app.get("/user", getUser);
-function getUser(req, res) {
-  res.json(user);
-}
-
-//post request
-//client -> server
-// app.post("/user", createUser){
-function createUser(req, res) {
-  user = req.body;
-  res.send("data has been added successfully");
-}
-
-// app.patch("/user", updateUser);
-function updateUser(req, res) {
-  let obj = req.body;
-  for (let key in obj) {
-    user[key] = obj[key];
-  }
-  res.json(user);
-}
-
-// app.delete("/user", deleteUser);
-function deleteUser(req, res) {
-  user = {};
-  res.json(user);
-}
-
-//param route
-// app.get('/user/:id', getUserById);
-function getUserById(req, res) {
-  console.log(req.params);
-  res.json(req.params.id);
-}
-
-//REDIRECTS
-app.get("/user-all", (req, res) => {
-  res.redirect("/user");
-});
-
-//HOW TO MAKE A 404 PAGE FOR WRONG URL
-//always keep it last
-app.use((req, res) => {
-  res.sendFile("public/404.html", { root: __dirname });
-});
+// //HOW TO MAKE A 404 PAGE FOR WRONG URL
+// //always keep it last
+// app.use((req, res) => {
+//   res.sendFile("public/404.html", { root: __dirname });
+// });
