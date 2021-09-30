@@ -1,9 +1,10 @@
 const express = require("express");
+const userModel = require("../models/userModel");
 const userRouter = express.Router();
 
 userRouter
   .route("/")
-  .get(getUser)
+  .get(getUsers)
   .post(createUser)
   .patch(updateUser)
   .delete(deleteUser);
@@ -12,9 +13,24 @@ userRouter.route("/:id").get(getUserById);
 
 
 // app.get("/user", getUser);
-async function getUser(req, res) {
-    console.log('getUser called');
-    res.json(user);
+async function getUsers(req, res) {
+    try{    
+        console.log('getUser called');
+        let users = await userModel.find(); //mongo k collections se sare documents leaega
+        if(users){
+            return res.json(users);
+        }
+        else{
+            return res.json({
+                message: "users not found"
+            });
+        }
+    }
+    catch(err){
+        return res.json({
+            message: err.message
+        })
+    }
 }
   
 //post request
