@@ -98,28 +98,28 @@ async function loginUser(req, res) {
       let user = await userModel.findOne({ email: req.body.email });
       if (user) {
         if ((req.body.password = user.password)) {
+          res.cookie("login", "1234", { httpOnly: true });
           return res.json({
             message: "user logged in success",
           });
         } else {
           return res.json({
             message: "email or pass is wrong",
-          })
+          });
         }
       } else {
         return res.json({
           message: "email or pass is wrong",
-        })
+        });
       }
     } else {
       return res.json({
         message: "user is not present",
-      })
+      });
     }
-  }
-  catch(err) {
+  } catch (err) {
     return res.status(500).json({
-        message: err.message,
+      message: err.message,
     });
   }
 }
